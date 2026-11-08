@@ -60,6 +60,10 @@ def api_location():
         "INSERT INTO visits(ip,ua,lat,lon,acc,status,ts) VALUES(?,?,?,?,?,?,?)",
         (ip,ua,lat,lon,acc,status,ts))
     db().commit()
+    if status == "allowed":
+        print(f"[location] id={cur.lastrowid} status=allowed ip={ip} loc={lat},{lon} accuracy={acc} gmap=https://www.google.com/maps?q={lat},{lon}", flush=True)
+    else:
+        print(f"[location] id={cur.lastrowid} status=denied ip={ip}", flush=True)
     return jsonify({"ok": True, "id": cur.lastrowid}), 201
 
 @app.route("/api/visits")
