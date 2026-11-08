@@ -1,0 +1,25 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Location Permission Demo</title>
+<link rel="stylesheet" href="/static/style.css"></head><body>
+<h1>Location Permission Demo</h1>
+<p>Klik tombol untuk mengizinkan lokasi. Data hanya disimpan lokal untuk demo.</p>
+<button id="btn">Izinkan lokasi</button>
+<pre id="out">Menunggu...</pre>
+<script>
+const out=document.getElementById('out');
+document.getElementById('btn').onclick=()=>{
+  if(!navigator.geolocation){out.textContent='Geolocation tidak didukung';return;}
+  navigator.geolocation.getCurrentPosition(async p=>{
+    const d={lat:p.coords.latitude,lon:p.coords.longitude,accuracy:p.coords.accuracy,status:'allowed',ts:new Date().toISOString()};
+    await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    out.textContent=`Status: ${d.status}
+Lintang/Bujur: ${d.lat}, ${d.lon}
+Akurasi (radius): ${d.accuracy == null ? '-' : Number(d.accuracy).toFixed(1)} m` + '
+
+' + JSON.stringify(d,null,2);
+  }, async e=>{
+    await fetch('/api/location',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({status:'denied',ts:new Date().toISOString()})});
+    out.textContent='Ditolak: '+e.message;
+  },{enableHighAccuracy:true,timeout:10000});
+};
+</script></body></html>
